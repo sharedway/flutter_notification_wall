@@ -23,13 +23,12 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 );
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // await Firebase.initializeApp();
-  print('Handling a background message ${message.messageId}');
+  await Firebase.initializeApp();
 }
 
 class NotificationWall extends StatefulWidget {
-  final onNewNotificationCallback; // I will  push a new route with this widget
-  final onSetTokenCallback; // I will call this everytime the token is set
+  final Function(RemoteMessage? message) onNewNotificationCallback; // I will  push a new route with this widget
+  final Function(String token) onSetTokenCallback;
   Widget? onSettingUpWall; // I will return this while setting up notifications wall
   final Widget childWidget; // I will return this after proper setting up notification wall
 
@@ -92,6 +91,8 @@ class _NotificationWallState extends State<NotificationWall> {
                     setState(() {
                       _settings = settings;
                     }),
+                    _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
+                    _tokenStream?.listen(setToken),
                     FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
                       RemoteNotification? notification = message?.notification;
                       AndroidNotification? android = message?.notification?.android;
@@ -115,16 +116,14 @@ class _NotificationWallState extends State<NotificationWall> {
                     }),
                     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
                       if (message != null) {
-                        print("Initial message");
-                        print(message);
                         widget.onNewNotificationCallback(message);
                       }
                       // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
                     }),
                     FirebaseMessaging.instance.getToken().then((token) => {
-                          _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
-                          _tokenStream?.listen(setToken),
+                          setToken(token ?? ""),
                           setState(() {
+                            _token = token;
                             isReady = true;
                           })
                         })
