@@ -35,6 +35,19 @@ class NotificationWall extends StatefulWidget {
 
 class _NotificationWallState extends State<NotificationWall> {
   bool isReady = false;
+  NotificationSettings? _settings;
+
+  Future<void> requestPermissions() async {
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+      announcement: true,
+      carPlay: true,
+      criticalAlert: true,
+    );
+
+    setState(() {
+      _settings = settings;
+    });
+  }
 
   Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     // await Firebase.initializeApp();
@@ -64,36 +77,41 @@ class _NotificationWallState extends State<NotificationWall> {
   @override
   void initState() {
     super.initState();
-    onInitWall().then((value) => {
-          FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
-            RemoteNotification? notification = message?.notification;
-            AndroidNotification? android = message?.notification?.android;
-            if (notification != null && android != null) {
-              flutterLocalNotificationsPlugin.show(
-                  notification.hashCode,
-                  notification.title,
-                  notification.body,
-                  NotificationDetails(
-                    android: AndroidNotificationDetails(
-                      channel.id,
-                      channel.name,
-                      channel.description,
-                      icon: 'launch_background',
-                    ),
-                  ));
-            }
-          }),
-          FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
-            print('A new onMessageOpenedApp event was published!');
-          }),
-          FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-            print(message);
-            // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
-          }),
-          setState(() {
-            isReady = true;
-          })
-        });
+    onInitWall()
+        .then((value) => {
+              FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+                RemoteNotification? notification = message?.notification;
+                AndroidNotification? android = message?.notification?.android;
+                if (notification != null && android != null) {
+                  flutterLocalNotificationsPlugin.show(
+                      notification.hashCode,
+                      notification.title,
+                      notification.body,
+                      NotificationDetails(
+                        android: AndroidNotificationDetails(
+                          channel.id,
+                          channel.name,
+                          channel.description,
+                          icon: 'launch_background',
+                        ),
+                      ));
+                }
+              }),
+              FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
+                print('A new onMessageOpenedApp event was published!');
+              }),
+              FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+                print(message);
+                // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
+              }),
+            })
+        .then((_) => {
+              requestPermissions().then((_) => {
+                    setState(() {
+                      isReady = true;
+                    })
+                  })
+            });
   }
 
   @override

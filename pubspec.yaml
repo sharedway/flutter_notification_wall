@@ -1,6 +1,6 @@
 name: notification_wall
 description: (Alpha, not ready for use) A statefull widget to initialize and handle Firebase messaging notifications.
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/lauro-cesar
 
 environment:
