@@ -113,7 +113,6 @@ class _NotificationWallState extends State<NotificationWall> {
                 }
               }),
               FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
-                print('A new onMessageOpenedApp event was published!');
                 widget.onNewNotificationCallback(message);
               }),
               FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
