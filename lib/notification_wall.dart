@@ -57,17 +57,6 @@ class _NotificationWallState extends State<NotificationWall> {
     widget.onSetTokenCallback(token);
   }
 
-  Future<void> requestPermissions() async {
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-      announcement: true,
-      carPlay: true,
-      criticalAlert: true,
-    );
-    setState(() {
-      _settings = settings;
-    });
-  }
-
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
@@ -92,38 +81,46 @@ class _NotificationWallState extends State<NotificationWall> {
   @override
   void initState() {
     super.initState();
-    onInitWall()
-        .then((value) => {
-              FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
-                RemoteNotification? notification = message?.notification;
-                AndroidNotification? android = message?.notification?.android;
-                if (notification != null && android != null) {
-                  flutterLocalNotificationsPlugin.show(
-                      notification.hashCode,
-                      notification.title,
-                      notification.body,
-                      NotificationDetails(
-                        android: AndroidNotificationDetails(
-                          channel.id,
-                          channel.name,
-                          channel.description,
-                          icon: 'launch_background',
-                        ),
-                      ));
-                }
-              }),
-              FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
-                widget.onNewNotificationCallback(message);
-              }),
-              FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-                print("Initial message");
-                print(message);
-                widget.onNewNotificationCallback(message);
-                // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
-              }),
-            })
-        .then((_) => {
-              requestPermissions().then((_) => {
+    onInitWall().then((value) => {
+          FirebaseMessaging.instance
+              .requestPermission(
+                announcement: true,
+                carPlay: true,
+                criticalAlert: true,
+              )
+              .then((NotificationSettings settings) => {
+                    setState(() {
+                      _settings = settings;
+                    }),
+                    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+                      RemoteNotification? notification = message?.notification;
+                      AndroidNotification? android = message?.notification?.android;
+                      if (notification != null && android != null) {
+                        flutterLocalNotificationsPlugin.show(
+                            notification.hashCode,
+                            notification.title,
+                            notification.body,
+                            NotificationDetails(
+                              android: AndroidNotificationDetails(
+                                channel.id,
+                                channel.name,
+                                channel.description,
+                                icon: 'launch_background',
+                              ),
+                            ));
+                      }
+                    }),
+                    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
+                      widget.onNewNotificationCallback(message);
+                    }),
+                    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+                      if (message != null) {
+                        print("Initial message");
+                        print(message);
+                        widget.onNewNotificationCallback(message);
+                      }
+                      // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
+                    }),
                     FirebaseMessaging.instance.getToken().then((token) => {
                           _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
                           _tokenStream?.listen(setToken),
@@ -132,7 +129,7 @@ class _NotificationWallState extends State<NotificationWall> {
                           })
                         })
                   })
-            });
+        });
   }
 
   @override
