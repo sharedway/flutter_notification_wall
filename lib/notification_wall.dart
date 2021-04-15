@@ -22,12 +22,19 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   importance: Importance.high,
 );
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
 class NotificationWall extends StatefulWidget {
   final Widget onNewNotification; // I will  push a new route with this widget
+  final onSetTokenCallback; // I will call this everytime the token is set
   Widget? onSettingUpWall; // I will return this while setting up notifications wall
   final Widget childWidget; // I will return this after proper setting up notification wall
 
-  NotificationWall({required this.onNewNotification, required this.childWidget, this.onSettingUpWall});
+  NotificationWall(
+      {required this.onNewNotification, required this.childWidget, required this.onSetTokenCallback, this.onSettingUpWall});
 
   @override
   _NotificationWallState createState() => _NotificationWallState();
@@ -35,7 +42,17 @@ class NotificationWall extends StatefulWidget {
 
 class _NotificationWallState extends State<NotificationWall> {
   bool isReady = false;
+  String? _token;
+  Stream<String>? _tokenStream;
+
   NotificationSettings? _settings;
+
+  void setToken(String token) {
+    setState(() {
+      _token = token;
+    });
+    widget.onSetTokenCallback(token);
+  }
 
   Future<void> requestPermissions() async {
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
@@ -43,20 +60,15 @@ class _NotificationWallState extends State<NotificationWall> {
       carPlay: true,
       criticalAlert: true,
     );
-
     setState(() {
       _settings = settings;
     });
   }
 
-  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    // await Firebase.initializeApp();
-    print('Handling a background message ${message.messageId}');
-  }
-
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
+
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -107,9 +119,13 @@ class _NotificationWallState extends State<NotificationWall> {
             })
         .then((_) => {
               requestPermissions().then((_) => {
-                    setState(() {
-                      isReady = true;
-                    })
+                    FirebaseMessaging.instance.getToken().then((token) => {
+                          _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
+                          _tokenStream?.listen(setToken),
+                          setState(() {
+                            isReady = true;
+                          })
+                        })
                   })
             });
   }
