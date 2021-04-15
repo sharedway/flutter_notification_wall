@@ -9,3 +9,8 @@
 ## [0.0.10] - 4/15/21
 
 * Added onTokenRefresh callback
+
+
+## [0.0.11] - 4/15/21
+
+* fixed onTokenRefresh callback
