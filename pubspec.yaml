@@ -1,8 +1,7 @@
 name: notification_wall
-description: A new Flutter package project.
+description: (Alpha, not ready for use) A statefull widget to initialize and handle Firebase messaging notifications.
 version: 0.0.1
-author:
-homepage:
+homepage: https://github.com/lauro-cesar
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

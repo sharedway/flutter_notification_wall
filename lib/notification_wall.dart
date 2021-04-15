@@ -98,6 +98,17 @@ class _NotificationWallState extends State<NotificationWall> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    if (isReady) {
+      return widget.childWidget;
+    } else {
+      return widget.onSettingUpWall ??
+          Scaffold(
+            body: Container(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
+    }
   }
 }

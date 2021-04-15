@@ -1,3 +1,3 @@
-## [0.0.1] - TODO: Add release date.
+## [0.0.1] - 4/15/21
 
-* TODO: Describe initial release.
+* Added a simple notification wall that handle the initialization of Firebase, background and Local notifications.
