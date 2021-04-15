@@ -28,13 +28,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class NotificationWall extends StatefulWidget {
-  final Widget onNewNotification; // I will  push a new route with this widget
+  final onNewNotificationCallback; // I will  push a new route with this widget
   final onSetTokenCallback; // I will call this everytime the token is set
   Widget? onSettingUpWall; // I will return this while setting up notifications wall
   final Widget childWidget; // I will return this after proper setting up notification wall
 
   NotificationWall(
-      {required this.onNewNotification, required this.childWidget, required this.onSetTokenCallback, this.onSettingUpWall});
+      {required this.onNewNotificationCallback,
+      required this.childWidget,
+      required this.onSetTokenCallback,
+      this.onSettingUpWall});
 
   @override
   _NotificationWallState createState() => _NotificationWallState();
@@ -111,9 +114,12 @@ class _NotificationWallState extends State<NotificationWall> {
               }),
               FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
                 print('A new onMessageOpenedApp event was published!');
+                widget.onNewNotificationCallback(message);
               }),
               FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+                print("Initial message");
                 print(message);
+                widget.onNewNotificationCallback(message);
                 // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
               }),
             })
