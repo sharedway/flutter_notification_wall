@@ -18,3 +18,8 @@
 ## [0.0.12] - 4/15/21
 
 * fixed LocalNotification callback
+
+## [0.0.13] - 4/18/21
+
+* Added List of Topics to subscribe in.
+ 
