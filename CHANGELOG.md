@@ -14,3 +14,7 @@
 ## [0.0.11] - 4/15/21
 
 * fixed onTokenRefresh callback
+
+## [0.0.12] - 4/15/21
+
+* fixed LocalNotification callback

@@ -31,12 +31,14 @@ class NotificationWall extends StatefulWidget {
   final Function(String token) onSetTokenCallback;
   final Widget onSettingUpWall; // I will return this while setting up notifications wall
   final Widget childWidget; // I will return this after proper setting up notification wall
+  List<String>? topicsToSubscribe;
 
   NotificationWall(
       {required this.onNewNotificationCallback,
       required this.childWidget,
       required this.onSetTokenCallback,
-      required this.onSettingUpWall});
+      required this.onSettingUpWall,
+      this.topicsToSubscribe});
 
   @override
   _NotificationWallState createState() => _NotificationWallState();
@@ -117,6 +119,9 @@ class _NotificationWallState extends State<NotificationWall> {
                     }),
                     FirebaseMessaging.instance.getToken().then((token) => {
                           setToken(token ?? ""),
+                          widget.topicsToSubscribe?.forEach((topic) {
+                            FirebaseMessaging.instance.subscribeToTopic(topic);
+                          }),
                           setState(() {
                             isReady = true;
                           })
