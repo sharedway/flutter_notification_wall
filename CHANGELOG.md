@@ -23,3 +23,6 @@
 
 * Added List of Topics to subscribe in.
  
+## [0.0.14] - 4/22/21
+
+* Fixed onReady callback on Simulator 

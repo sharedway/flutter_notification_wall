@@ -76,58 +76,64 @@ class _NotificationWallState extends State<NotificationWall> {
   @override
   void initState() {
     super.initState();
-    onInitWall().then((value) => {
-          FirebaseMessaging.instance
-              .requestPermission(
-                announcement: true,
-                carPlay: true,
-                criticalAlert: true,
-              )
-              .then((NotificationSettings settings) => {
-                    _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
-                    _tokenStream?.listen(setToken),
-                    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
-                      widget.onNewNotificationCallback(message);
+    onInitWall()
+        .then((value) => {
+              FirebaseMessaging.instance
+                  .requestPermission(
+                    announcement: true,
+                    carPlay: true,
+                    criticalAlert: true,
+                  )
+                  .then((NotificationSettings settings) => {
+                        _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
+                        _tokenStream?.listen(setToken),
+                        FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+                          widget.onNewNotificationCallback(message);
 
-                      // RemoteNotification? notification = message?.notification;
-                      // AndroidNotification? android = message?.notification?.android;
-                      // if (notification != null && android != null) {
-                      //   flutterLocalNotificationsPlugin.show(
-                      //       notification.hashCode,
-                      //       notification.title,
-                      //       notification.body,
-                      //       NotificationDetails(
-                      //         android: AndroidNotificationDetails(
-                      //           channel.id,
-                      //           channel.name,
-                      //           channel.description,
-                      //           icon: 'launch_background',
-                      //         ),
-                      //       ));
-                      // }
-                    }),
-                    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
-                      if (message != null) {
-                        widget.onNewNotificationCallback(message);
-                      }
-                    }),
-                    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-                      if (message != null) {
-                        widget.onNewNotificationCallback(message);
-                      }
-                      // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
-                    }),
-                    FirebaseMessaging.instance.getToken().then((token) => {
-                          setToken(token ?? ""),
-                          widget.topicsToSubscribe?.forEach((topic) {
-                            FirebaseMessaging.instance.subscribeToTopic(topic);
-                          }),
-                          setState(() {
-                            isReady = true;
-                          })
-                        })
-                  })
-        });
+                          // RemoteNotification? notification = message?.notification;
+                          // AndroidNotification? android = message?.notification?.android;
+                          // if (notification != null && android != null) {
+                          //   flutterLocalNotificationsPlugin.show(
+                          //       notification.hashCode,
+                          //       notification.title,
+                          //       notification.body,
+                          //       NotificationDetails(
+                          //         android: AndroidNotificationDetails(
+                          //           channel.id,
+                          //           channel.name,
+                          //           channel.description,
+                          //           icon: 'launch_background',
+                          //         ),
+                          //       ));
+                          // }
+                        }),
+                        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
+                          if (message != null) {
+                            widget.onNewNotificationCallback(message);
+                          }
+                        }),
+                        FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+                          if (message != null) {
+                            widget.onNewNotificationCallback(message);
+                          }
+                          // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
+                        }),
+                        FirebaseMessaging.instance.getToken().then((token) => {
+                              setToken(token ?? ""),
+                              widget.topicsToSubscribe?.forEach((topic) {
+                                FirebaseMessaging.instance.subscribeToTopic(topic);
+                              }),
+                              setState(() {
+                                isReady = true;
+                              })
+                            })
+                      })
+            })
+        .then((_) => {
+              setState(() {
+                isReady = true;
+              })
+            });
   }
 
   @override
