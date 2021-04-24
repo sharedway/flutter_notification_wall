@@ -30,14 +30,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// The wall widget,
 class NotificationWall extends StatefulWidget {
   /// called everytime a new notification arrives
-  final Function(RemoteMessage? message) onNewNotificationCallback; // I will  push a new route with this widget
+  final Function(RemoteMessage? message)
+      onNewNotificationCallback; // I will  push a new route with this widget
   /// Called eerytime a new token is set
   final Function(String token) onSetTokenCallback;
 
   /// Returned while setting up the Firebase
-  final Widget onSettingUpWall; // I will return this while setting up notifications wall
+  final Widget
+      onSettingUpWall; // I will return this while setting up notifications wall
   ///Returned after setup is done
-  final Widget childWidget; // I will return this after proper setting up notification wall
+  final Widget
+      childWidget; // I will return this after proper setting up notification wall
   ///Obtional list of topics to subscribe
   final List<String>? topicsToSubscribe;
 
@@ -76,7 +79,8 @@ class _NotificationWallState extends State<NotificationWall> {
     // }
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
@@ -96,9 +100,11 @@ class _NotificationWallState extends State<NotificationWall> {
                     criticalAlert: true,
                   )
                   .then((NotificationSettings settings) => {
-                        _tokenStream = FirebaseMessaging.instance.onTokenRefresh,
+                        _tokenStream =
+                            FirebaseMessaging.instance.onTokenRefresh,
                         _tokenStream?.listen(setToken),
-                        FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+                        FirebaseMessaging.onMessage
+                            .listen((RemoteMessage? message) {
                           widget.onNewNotificationCallback(message);
 
                           // RemoteNotification? notification = message?.notification;
@@ -118,12 +124,15 @@ class _NotificationWallState extends State<NotificationWall> {
                           //       ));
                           // }
                         }),
-                        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
+                        FirebaseMessaging.onMessageOpenedApp
+                            .listen((RemoteMessage? message) {
                           if (message != null) {
                             widget.onNewNotificationCallback(message);
                           }
                         }),
-                        FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+                        FirebaseMessaging.instance
+                            .getInitialMessage()
+                            .then((RemoteMessage? message) {
                           if (message != null) {
                             widget.onNewNotificationCallback(message);
                           }
@@ -132,7 +141,8 @@ class _NotificationWallState extends State<NotificationWall> {
                         FirebaseMessaging.instance.getToken().then((token) => {
                               setToken(token ?? ""),
                               widget.topicsToSubscribe?.forEach((topic) {
-                                FirebaseMessaging.instance.subscribeToTopic(topic);
+                                FirebaseMessaging.instance
+                                    .subscribeToTopic(topic);
                               }),
                               setState(() {
                                 isReady = true;
