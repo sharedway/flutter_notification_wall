@@ -22,16 +22,24 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 //   importance: Importance.high,
 // );
 
+/// This future will handle background notifications
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
+/// The wall widget,
 class NotificationWall extends StatefulWidget {
+  /// called everytime a new notification arrives
   final Function(RemoteMessage? message) onNewNotificationCallback; // I will  push a new route with this widget
+  /// Called eerytime a new token is set
   final Function(String token) onSetTokenCallback;
+
+  /// Returned while setting up the Firebase
   final Widget onSettingUpWall; // I will return this while setting up notifications wall
+  ///Returned after setup is done
   final Widget childWidget; // I will return this after proper setting up notification wall
-  List<String>? topicsToSubscribe;
+  ///Obtional list of topics to subscribe
+  final List<String>? topicsToSubscribe;
 
   NotificationWall(
       {required this.onNewNotificationCallback,
@@ -45,13 +53,16 @@ class NotificationWall extends StatefulWidget {
 }
 
 class _NotificationWallState extends State<NotificationWall> {
+  /// Return onSettingUpWall while false
   bool isReady = false;
   Stream<String>? _tokenStream;
 
+  ///Helper to set and propagate token
   void setToken(String token) {
     widget.onSetTokenCallback(token);
   }
 
+  ///Set up Firebase settings
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();

@@ -26,3 +26,8 @@
 ## [0.0.14] - 4/22/21
 
 * Fixed onReady callback on Simulator 
+
+## [0.0.15] - 4/24/21
+
+* Added example draft
+* Start to add documentations to public APIs 
