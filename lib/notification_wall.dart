@@ -11,16 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-//
-// const AndroidNotificationChannel channel = AndroidNotificationChannel(
-//   'high_importance_channel', // id
-//   'High Importance Notifications', // title
-//   'This channel is used for important notifications.', // description
-//   importance: Importance.high,
-// );
 
 /// This future will handle background notifications
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -34,6 +24,9 @@ class NotificationWall extends StatefulWidget {
       onNewNotificationCallback; // I will  push a new route with this widget
   /// Called eerytime a new token is set
   final Function(String token) onSetTokenCallback;
+
+  /// Called once after setting up
+  final Function() onSetupIsDoneCallback;
 
   /// Returned while setting up the Firebase
   final Widget
@@ -49,6 +42,7 @@ class NotificationWall extends StatefulWidget {
       required this.childWidget,
       required this.onSetTokenCallback,
       required this.onSettingUpWall,
+      required this.onSetupIsDoneCallback,
       this.topicsToSubscribe});
 
   @override
@@ -60,24 +54,24 @@ class _NotificationWallState extends State<NotificationWall> {
   bool isReady = false;
   Stream<String>? _tokenStream;
 
-  ///Helper to set and propagate token
+  ///Helper to set and bubble up  token
   void setToken(String token) {
     widget.onSetTokenCallback(token);
+  }
+
+  ///Helper to set and bubble up new nessages
+  void onNotificationCallBack(RemoteMessage? message) {
+    /// lets check if the message is null before bubble up
+    if (message != null) {
+      widget.onNewNotificationCallback(message);
+    }
   }
 
   ///Set up Firebase settings
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    //
-    // if (defaultTargetPlatform == TargetPlatform.android) {
-    //   await flutterLocalNotificationsPlugin
-    //       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-    //       ?.createNotificationChannel(channel);
-    // }
-
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
@@ -91,6 +85,9 @@ class _NotificationWallState extends State<NotificationWall> {
   @override
   void initState() {
     super.initState();
+
+    /// keep the loading state (isReady=false) while setting up
+    /// FirebaseMessaging
     onInitWall()
         .then((value) => {
               FirebaseMessaging.instance
@@ -104,39 +101,15 @@ class _NotificationWallState extends State<NotificationWall> {
                             FirebaseMessaging.instance.onTokenRefresh,
                         _tokenStream?.listen(setToken),
                         FirebaseMessaging.onMessage
-                            .listen((RemoteMessage? message) {
-                          widget.onNewNotificationCallback(message);
-
-                          // RemoteNotification? notification = message?.notification;
-                          // AndroidNotification? android = message?.notification?.android;
-                          // if (notification != null && android != null) {
-                          //   flutterLocalNotificationsPlugin.show(
-                          //       notification.hashCode,
-                          //       notification.title,
-                          //       notification.body,
-                          //       NotificationDetails(
-                          //         android: AndroidNotificationDetails(
-                          //           channel.id,
-                          //           channel.name,
-                          //           channel.description,
-                          //           icon: 'launch_background',
-                          //         ),
-                          //       ));
-                          // }
-                        }),
+                            .listen((RemoteMessage? message) {}),
                         FirebaseMessaging.onMessageOpenedApp
                             .listen((RemoteMessage? message) {
-                          if (message != null) {
-                            widget.onNewNotificationCallback(message);
-                          }
+                          onNotificationCallBack(message);
                         }),
                         FirebaseMessaging.instance
                             .getInitialMessage()
                             .then((RemoteMessage? message) {
-                          if (message != null) {
-                            widget.onNewNotificationCallback(message);
-                          }
-                          // Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
+                          onNotificationCallBack(message);
                         }),
                         FirebaseMessaging.instance.getToken().then((token) => {
                               setToken(token ?? ""),
@@ -151,10 +124,13 @@ class _NotificationWallState extends State<NotificationWall> {
                       })
             })
         .then((_) => {
+              /// this property name will change later to isDone, we need to
+              /// handle a failling initialization of  FirebaseMessaging...
               setState(() {
                 isReady = true;
               })
-            });
+            })
+        .then((_) => widget.onSetupIsDoneCallback());
   }
 
   @override

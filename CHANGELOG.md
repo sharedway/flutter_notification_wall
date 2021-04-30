@@ -31,3 +31,8 @@
 
 * Added example draft
 * Start to add documentations to public APIs 
+
+## [1.0.1] - 4/30/21
+
+* Added a functional example
+* First  release
