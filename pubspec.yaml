@@ -2,6 +2,7 @@ name: notification_wall
 description: A statefull widget to initialize and handle Firebase messaging notifications, using a IndexedStack to keep app state.
 version: 1.0.1
 homepage: https://github.com/lauro-cesar
+repository: https://github.com/sharedway/flutter_notification_wall
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
