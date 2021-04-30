@@ -12,11 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-/// This future will handle background notifications
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-}
-
 /// The wall widget,
 class NotificationWall extends StatefulWidget {
   /// called everytime a new notification arrives
@@ -60,7 +55,7 @@ class _NotificationWallState extends State<NotificationWall> {
   }
 
   ///Helper to set and bubble up new nessages
-  void onNotificationCallBack(RemoteMessage? message) {
+  Future<void> onNotificationCallBack(RemoteMessage? message) async {
     /// lets check if the message is null before bubble up
     if (message != null) {
       widget.onNewNotificationCallback(message);
@@ -71,7 +66,7 @@ class _NotificationWallState extends State<NotificationWall> {
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage(onNotificationCallBack);
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(

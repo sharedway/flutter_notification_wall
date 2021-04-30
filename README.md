@@ -4,7 +4,13 @@ A statefull widget to initialize and handle Firebase messaging notifications.
 
 ## Getting Started
 
-This widget handle new notifications;
+This widget handle new notifications; 
+
+This requires a manual setup of the firebase_messaging package to works.
+https://pub.dev/packages/firebase_messaging.
+
+## TODO:
+* automatic setup;
 
 
 ``` 
@@ -52,7 +58,3 @@ class MyApp extends StatelessWidget {
 
 ```
 
-## TODO:
-
-* code generation to setup Android gradle;
-* automatic setup Ios .plist 

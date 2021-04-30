@@ -36,3 +36,7 @@
 
 * Added a functional example
 * First  release
+
+## [1.0.2] - 4/30/21
+
+* Added background handler
