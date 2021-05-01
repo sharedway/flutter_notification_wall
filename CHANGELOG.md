@@ -40,3 +40,10 @@
 ## [1.0.2] - 4/30/21
 
 * Added background handler
+
+## [1.0.3] - 4/30/21
+
+* Added more docs
+
+## [1.0.7] - 4/30/21
+* Fixed handleMessageCallback

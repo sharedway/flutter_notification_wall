@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// The wall widget,
 class NotificationWall extends StatefulWidget {
@@ -48,6 +49,8 @@ class _NotificationWallState extends State<NotificationWall> {
   /// Return onSettingUpWall while false
   bool isReady = false;
   Stream<String>? _tokenStream;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   ///Helper to set and bubble up  token
   void setToken(String token) {
@@ -55,18 +58,53 @@ class _NotificationWallState extends State<NotificationWall> {
   }
 
   ///Helper to set and bubble up new nessages
-  Future<void> onNotificationCallBack(RemoteMessage? message) async {
+  Future<void> onBackgroundNotificationCallBack(RemoteMessage? message) async {
+    await Firebase.initializeApp();
+    print("New bg message");
+
     /// lets check if the message is null before bubble up
+    onNotificationCallBack(message);
+  }
+
+  static const AndroidNotificationChannel androidChannel =
+      AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    'This channel is used for important notifications.', // description
+    importance: Importance.high,
+  );
+
+  ///Helper to set and bubble up new nessages
+  void onNotificationCallBack(RemoteMessage? message) {
     if (message != null) {
       widget.onNewNotificationCallback(message);
+      if (message.notification?.android != null) {
+        flutterLocalNotificationsPlugin.show(
+            message.notification?.hashCode ?? 0,
+            message.notification?.title,
+            message.notification?.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                androidChannel.id,
+                androidChannel.name,
+                androidChannel.description,
+                // TODO add a proper drawable resource to android, for now using
+                //      one that already exists in example app.
+                icon: 'launch_background',
+              ),
+            ));
+      }
     }
+
+    /// lets check if the message is null before bubble up
   }
 
   ///Set up Firebase settings
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(onNotificationCallBack);
+    FirebaseMessaging.onBackgroundMessage(onBackgroundNotificationCallBack);
+
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
@@ -84,7 +122,7 @@ class _NotificationWallState extends State<NotificationWall> {
     /// keep the loading state (isReady=false) while setting up
     /// FirebaseMessaging
     onInitWall()
-        .then((value) => {
+        .then((_) => {
               FirebaseMessaging.instance
                   .requestPermission(
                     announcement: true,
@@ -96,7 +134,9 @@ class _NotificationWallState extends State<NotificationWall> {
                             FirebaseMessaging.instance.onTokenRefresh,
                         _tokenStream?.listen(setToken),
                         FirebaseMessaging.onMessage
-                            .listen((RemoteMessage? message) {}),
+                            .listen((RemoteMessage? message) {
+                          onNotificationCallBack(message);
+                        }),
                         FirebaseMessaging.onMessageOpenedApp
                             .listen((RemoteMessage? message) {
                           onNotificationCallBack(message);
@@ -112,9 +152,9 @@ class _NotificationWallState extends State<NotificationWall> {
                                 FirebaseMessaging.instance
                                     .subscribeToTopic(topic);
                               }),
-                              setState(() {
-                                isReady = true;
-                              })
+                              // setState(() {
+                              //   isReady = true;
+                              // })
                             })
                       })
             })
