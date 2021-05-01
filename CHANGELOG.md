@@ -47,3 +47,6 @@
 
 ## [1.0.7] - 4/30/21
 * Fixed handleMessageCallback
+
+## [1.0.8] - 4/30/21
+* Removed LocalNotifications
