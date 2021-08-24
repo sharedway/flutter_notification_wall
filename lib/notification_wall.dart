@@ -61,7 +61,6 @@ class _NotificationWallState extends State<NotificationWall> {
   ///Helper to set and bubble up new nessages
   Future<void> onBackgroundNotificationCallBack(RemoteMessage? message) async {
     await Firebase.initializeApp();
-    print("New bg message");
 
     /// lets check if the message is null before bubble up
     onNotificationCallBack(message);
