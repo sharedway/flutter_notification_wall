@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// The wall widget,
 class NotificationWall extends StatefulWidget {
@@ -19,6 +19,7 @@ class NotificationWall extends StatefulWidget {
   final Function(RemoteMessage? message) onNewNotificationCallback; // I will  push a new route with this widget
   /// Called eerytime a new token is set
   final Function(String token) onSetTokenCallback;
+  final FirebaseOptions firebaseOptions;
 
   /// Called once after setting up
   final Function() onSetupIsDoneCallback;
@@ -33,6 +34,7 @@ class NotificationWall extends StatefulWidget {
   NotificationWall(
       {required this.onNewNotificationCallback,
       required this.childWidget,
+      required this.firebaseOptions,
       required this.onSetTokenCallback,
       required this.onSettingUpWall,
       required this.onSetupIsDoneCallback,
@@ -57,7 +59,7 @@ class _NotificationWallState extends State<NotificationWall> {
 
   ///Helper to set and bubble up new nessages
   Future<void> onBackgroundNotificationCallBack(RemoteMessage? message) async {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: widget.firebaseOptions);
 
     /// lets check if the message is null before bubble up
     onNotificationCallBack(message);

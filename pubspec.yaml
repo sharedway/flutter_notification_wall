@@ -1,25 +1,26 @@
 name: notification_wall
 description: A statefull widget to initialize and handle Firebase messaging notifications, using a IndexedStack to keep app state.
-version: 1.0.10
+version: 1.0.12
 homepage: https://github.com/lauro-cesar
 repository: https://github.com/sharedway/flutter_notification_wall
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: ">=2.16.2 <3.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
+  firebase_core: ^1.17.0
+  firebase_messaging: ^11.4.0
   flutter:
     sdk: flutter
-  firebase_core: ^1.4.0
-  firebase_messaging: ^10.0.4
-  flutter_local_notifications: ^8.0.0
+  flutter_local_notifications: ^9.5.3+1
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_lints: ^1.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
