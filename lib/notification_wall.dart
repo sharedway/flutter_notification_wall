@@ -48,9 +48,8 @@ class _NotificationWallState extends State<NotificationWall> {
   /// Return onSettingUpWall while false
   bool isReady = false;
   Stream<String>? _tokenStream;
-
-  // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  //     FlutterLocalNotificationsPlugin();
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  late AndroidNotificationChannel channel;
 
   ///Helper to set and bubble up  token
   void setToken(String token) {
@@ -59,10 +58,26 @@ class _NotificationWallState extends State<NotificationWall> {
 
   ///Helper to set and bubble up new nessages
   Future<void> onBackgroundNotificationCallBack(RemoteMessage? message) async {
-    await Firebase.initializeApp(options: widget.firebaseOptions);
-
     /// lets check if the message is null before bubble up
+    ///
+    ///
     onNotificationCallBack(message);
+
+    RemoteNotification? notification = message?.notification;
+    AndroidNotification? android = message?.notification?.android;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              icon: 'launch_background',
+            ),
+          ));
+    }
   }
   //
   // static const AndroidNotificationChannel androidChannel =
@@ -103,16 +118,26 @@ class _NotificationWallState extends State<NotificationWall> {
   ///Set up Firebase settings
   Future<void> onInitWall() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
+
+    await Firebase.initializeApp(options: widget.firebaseOptions);
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundNotificationCallBack);
 
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
+    if (!kIsWeb) {
+      channel = const AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications',
+        importance: Importance.high,
       );
+      flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      }
     }
   }
 
